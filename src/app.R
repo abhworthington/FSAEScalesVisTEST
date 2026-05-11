@@ -148,7 +148,7 @@ ui <- fluidPage(
                                     selected = "All")),
           mainPanel(width = 12,
             plotOutput("scattercenterofmass"),
-            div("Above, concentric rings represent bivariate density (joint distribution 
+            p("Above, concentric rings represent bivariate density (joint distribution 
             of X and Y variable), where the innermost rings are areas of highest mass/density
             observed (most data/observations). Below, line is a linear fit, presented with 95% CI.
             Both computed without consideration of factor variable."),
@@ -374,14 +374,14 @@ server <- function(input, output) {
         filter(!is.na(`Car Only`)) %>%
         ggplot(aes(y = .data[["Front %"]],
                    x = .data[["Left %"]])) +
-        #geom_density_2d(color = "black",
-        #                alpha = 0.4) +
         geom_point(aes(color = .data[[input$scatter_factor]],
                        shape = .data[[input$scatter_factor]])) +
+        geom_density_2d(color = "black",
+                        alpha = 0.4) +
         geom_vline(xintercept = 0.5) +
         geom_hline(yintercept = 0.5) +
         scale_x_continuous(labels = scales::label_percent(),
-                          transform = "reverse") +
+                           transform = "reverse") +
         scale_y_continuous(labels = scales::label_percent()) +
         theme_minimal(base_size = 14)
     })

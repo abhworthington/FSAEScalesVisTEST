@@ -147,11 +147,11 @@ ui <- fluidPage(
                                       "Wheel Diameter"),
                                     selected = "All")),
           mainPanel(width = 12,
-            plotOutput("scattercenterofmass"),
             p("Above, concentric rings represent bivariate density (joint distribution 
             of X and Y variable), where the innermost rings are areas of highest mass/density
             observed (most data/observations). Below, line is a linear fit, presented with 95% CI.
             Both computed without consideration of factor variable."),
+            plotOutput("scattercenterofmass"),
             plotOutput("scatterWheelbase"),
             plotOutput("scatterWheelFront")
           ))

@@ -11,6 +11,7 @@ library(shiny)
 #library(googlesheets4)
 library(readxl)
 library(ggplot2)
+library(ggbeeswarm)
 library(dplyr)
 #library(DT)
 #gs4_deauth()
@@ -126,7 +127,7 @@ ui <- fluidPage(
            div("The spikes cover maximum to minimum, or 1.5x the interquartile 
            range above or below the box (25th or 75th %ile) value, if outliers exist."),
            div("The dots represent the individual observations, jittered in the 
-           horizontal axis for legibility."),
+           horizontal axis as a \"beeswarm\" for legibility."),
            plotOutput("boxplotByFrame"),
            plotOutput("boxplotByAero"),
            plotOutput("boxplotByWheel"),
@@ -137,7 +138,7 @@ ui <- fluidPage(
            )),
       tabPanel("Scatterplots for Wheelbase and Balance",
                fluidRow(selectInput("scatter_factor",
-                                    "Select Factor for Scatter Plots",
+                                    "Select Factor for Scatterplots",
                                     c("All",
                                       "Engine Cylinders",
                                       "Turbo",
@@ -146,8 +147,12 @@ ui <- fluidPage(
                                       "Wheel Diameter"),
                                     selected = "All")),
           mainPanel(width = 12,
-            plotOutput("scatterWheelbase"),
             plotOutput("scattercenterofmass"),
+            div("Above, concentric rings represent bivariate density (joint distribution 
+            of X and Y variable), where the innermost rings are areas of highest mass/density
+            observed (most data/observations). Below, line is a linear fit, presented with 95% CI.
+            Both computed without consideration of factor variable."),
+            plotOutput("scatterWheelbase"),
             plotOutput("scatterWheelFront")
           ))
     )
@@ -205,11 +210,11 @@ server <- function(input, output) {
         geom_hline(yintercept = medianmass, alpha = 0.5) +
         geom_hline(yintercept = firstquartmass, alpha = 0.5) +
         geom_hline(yintercept = thirdquartmass, alpha = 0.5) +
-        geom_hline(yintercept = tenthpctmass, alpha = 0.5) +
+        # geom_hline(yintercept = tenthpctmass, alpha = 0.5) +
         annotate("text", x = 0.85*maxrank, y = firstquartmass - 4, label = paste("25th %ile:", round(firstquartmass, 1)), size = 11/.pt) +
         annotate("text", x = 0.85*maxrank, y = medianmass - 4, label = paste("Median:", round(medianmass, 1)), size = 11/.pt) +
         annotate("text", x = 0.85*maxrank, y = thirdquartmass - 4, label = paste("75th %ile:", round(thirdquartmass, 1)), size = 11/.pt) +
-        annotate("text", x = 0.85*maxrank, y = tenthpctmass - 4, label = paste("10th %ile:", round(tenthpctmass, 1)), size = 11/.pt) +
+        # annotate("text", x = 0.85*maxrank, y = tenthpctmass - 4, label = paste("10th %ile:", round(tenthpctmass, 1)), size = 11/.pt) +
         labs(y = "Car Only Weight, kg", x = "Weight Rank", color = input$rank_factor) +
         theme_minimal(base_size = 14)
     })
@@ -240,10 +245,10 @@ server <- function(input, output) {
                          x = Frame),
                      outliers = F,
                      width = 0.66) +
-        geom_jitter(aes(y = `Car Only`,
+        geom_beeswarm(aes(y = `Car Only`,
                         x = Frame),
-                    alpha = 0.3,
-                    height = 0) +
+                    alpha = 0.6,
+                    cex = 1.5) +
         theme_minimal(base_size = 14)
     })
     
@@ -255,10 +260,10 @@ server <- function(input, output) {
                          x = `Aerodynamic Package`),
                      outliers = F,
                      width = 0.66) +
-        geom_jitter(aes(y = `Car Only`,
+        geom_beeswarm(aes(y = `Car Only`,
                         x = `Aerodynamic Package`),
-                    alpha = 0.3,
-                    height = 0) +
+                    alpha = 0.6,
+                    cex = 1.5) +
         theme_minimal(base_size = 14)
     })
     
@@ -270,10 +275,10 @@ server <- function(input, output) {
                          x = `Wheel Diameter`),
                      outliers = F,
                      width = 0.66) +
-        geom_jitter(aes(y = `Car Only`,
+        geom_beeswarm(aes(y = `Car Only`,
                         x = `Wheel Diameter`),
-                    alpha = 0.3,
-                    height = 0) +
+                      alpha = 0.6,
+                      cex = 1.5) +
         theme_minimal(base_size = 14)
     })
     
@@ -285,10 +290,10 @@ server <- function(input, output) {
                          x = `Engine Cylinders`),
                      outliers = F,
                      width = 0.66) +
-        geom_jitter(aes(y = `Car Only`,
+        geom_beeswarm(aes(y = `Car Only`,
                         x = `Engine Cylinders`),
-                    alpha = 0.3,
-                    height = 0) +
+                      alpha = 0.6,
+                      cex = 1.5) +
         theme_minimal(base_size = 14)
     })
     
@@ -300,10 +305,10 @@ server <- function(input, output) {
                          x = Turbo),
                      outliers = F,
                      width = 0.66) +
-        geom_jitter(aes(y = `Car Only`,
+        geom_beeswarm(aes(y = `Car Only`,
                         x = Turbo),
-                    alpha = 0.3,
-                    height = 0) +
+                      alpha = 0.6,
+                      cex = 1.5) +
         theme_minimal(base_size = 14)
     })
     
@@ -315,10 +320,10 @@ server <- function(input, output) {
                          x = `Wheel Diameter`),
                      outliers = F,
                      width = 0.66) +
-        geom_jitter(aes(y = `Car Only`,
+        geom_beeswarm(aes(y = `Car Only`,
                         x = `Wheel Diameter`),
-                    alpha = 0.3,
-                    height = 0) +
+                      alpha = 0.6,
+                      cex = 1.5) +
         theme_minimal(base_size = 14)
     })
     
@@ -330,10 +335,10 @@ server <- function(input, output) {
                          x = `Design Queue`),
                      outliers = F,
                      width = 0.66) +
-        geom_jitter(aes(y = `Car Only`,
+        geom_beeswarm(aes(y = `Car Only`,
                         x = `Design Queue`),
-                    alpha = 0.3,
-                    height = 0) +
+                      alpha = 0.6,
+                      cex = 1.5) +
         theme_minimal(base_size = 14)
     })
     
@@ -344,10 +349,10 @@ server <- function(input, output) {
         geom_boxplot(aes(y = `Car Only`,
                          x = `Design Time`),
                      outliers = F) +
-        geom_jitter(aes(y = `Car Only`,
+        geom_beeswarm(aes(y = `Car Only`,
                         x = `Design Time`),
-                    alpha = 0.3,
-                    height = 0) +
+                      alpha = 0.6,
+                      cex = 1.5) +
         theme_minimal(base_size = 14)
     })
     
@@ -369,11 +374,14 @@ server <- function(input, output) {
         filter(!is.na(`Car Only`)) %>%
         ggplot(aes(y = .data[["Front %"]],
                    x = .data[["Left %"]])) +
+        geom_density_2d(color = "black",
+                        alpha = 0.4) +
         geom_point(aes(color = .data[[input$scatter_factor]],
                        shape = .data[[input$scatter_factor]])) +
         geom_vline(xintercept = 0.5) +
         geom_hline(yintercept = 0.5) +
-        scale_x_continuous(labels = scales::label_percent()) +
+        scale_x_continuous(labels = scales::label_percent(),
+                           trans = "reverse") +
         scale_y_continuous(labels = scales::label_percent()) +
         theme_minimal(base_size = 14)
     })

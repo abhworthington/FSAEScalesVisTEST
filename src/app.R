@@ -380,8 +380,7 @@ server <- function(input, output) {
                        shape = .data[[input$scatter_factor]])) +
         geom_vline(xintercept = 0.5) +
         geom_hline(yintercept = 0.5) +
-        scale_x_continuous(labels = scales::label_percent(),
-                           transform = "reverse") +
+        scale_x_continuous(labels = scales::label_percent()) +
         scale_y_continuous(labels = scales::label_percent()) +
         theme_minimal(base_size = 14)
     })

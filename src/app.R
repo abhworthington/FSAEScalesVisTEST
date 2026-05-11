@@ -8,9 +8,12 @@
 #
 
 library(shiny)
+#library(googlesheets4)
 library(readxl)
 library(ggplot2)
 library(dplyr)
+#library(DT)
+#gs4_deauth()
 
 Input_Data <- read_excel("Scales Input Table - FSAE 2019 - EDITED.xlsx",
                          sheet = "Export Sheet") %>%
@@ -44,12 +47,14 @@ Input_Data <- read_excel("Scales Input Table - FSAE 2019 - EDITED.xlsx",
                                            "4:30PM")),
          `Engine Cylinders` = factor(`Engine Cylinders`))
 
+# Messing with factor level elements
 frame_levels <- levels(Input_Data$Frame)
 aero_levels <- levels(Input_Data$`Aerodynamic Package`)
 wheel_levels <- levels(Input_Data$`Wheel Diameter`)
 turbo_levels <- levels(Input_Data$Turbo)
 queue_levels <- levels(Input_Data$`Design Queue`)
 time_levels <- levels(Input_Data$`Design Time`)
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -114,8 +119,14 @@ ui <- fluidPage(
                # Create a new row for the table.
                DT::dataTableOutput("table")
                 ),
-      tabPanel("Boxplots by Factor",
-         mainPanel(
+      tabPanel("Boxplots by Vehicle Design Factor & Queue",
+         mainPanel(width = 12,
+           div("In these Tukey-type boxplots, the rectangle represents the 25th to 75th 
+           percentile range, the dark line the median."),
+           div("The spikes cover maximum to minimum, or 1.5x the interquartile 
+           range above or below the box (25th or 75th %ile) value, if outliers exist."),
+           div("The dots represent the individual observations, jittered in the 
+           horizontal axis for legibility."),
            plotOutput("boxplotByFrame"),
            plotOutput("boxplotByAero"),
            plotOutput("boxplotByWheel"),
@@ -124,7 +135,7 @@ ui <- fluidPage(
            plotOutput("boxplotByQueue"),
            plotOutput("boxplotByDesignTime")
            )),
-      tabPanel("Scatterplots",
+      tabPanel("Scatterplots for Wheelbase and Balance",
                fluidRow(selectInput("scatter_factor",
                                     "Select Factor for Scatter Plots",
                                     c("All",
@@ -134,9 +145,10 @@ ui <- fluidPage(
                                       "Aerodynamic Package",
                                       "Wheel Diameter"),
                                     selected = "All")),
-          mainPanel(
+          mainPanel(width = 12,
             plotOutput("scatterWheelbase"),
-            plotOutput("scattercenterofmass")
+            plotOutput("scattercenterofmass"),
+            plotOutput("scatterWheelFront")
           ))
     )
 )
@@ -194,12 +206,12 @@ server <- function(input, output) {
         geom_hline(yintercept = firstquartmass, alpha = 0.5) +
         geom_hline(yintercept = thirdquartmass, alpha = 0.5) +
         geom_hline(yintercept = tenthpctmass, alpha = 0.5) +
-        annotate("text", x = 0.9*maxrank, y = firstquartmass - 3, label = paste("25th Percentile:", round(firstquartmass))) +
-        annotate("text", x = 0.9*maxrank, y = medianmass - 3, label = paste("Median:", round(medianmass))) +
-        annotate("text", x = 0.9*maxrank, y = thirdquartmass - 3, label = paste("75th Percentile:", round(thirdquartmass))) +
-        annotate("text", x = 0.9*maxrank, y = tenthpctmass - 3, label = paste("10th Percentile:", round(tenthpctmass))) +
+        annotate("text", x = 0.85*maxrank, y = firstquartmass - 4, label = paste("25th %ile:", round(firstquartmass, 1)), size = 11/.pt) +
+        annotate("text", x = 0.85*maxrank, y = medianmass - 4, label = paste("Median:", round(medianmass, 1)), size = 11/.pt) +
+        annotate("text", x = 0.85*maxrank, y = thirdquartmass - 4, label = paste("75th %ile:", round(thirdquartmass, 1)), size = 11/.pt) +
+        annotate("text", x = 0.85*maxrank, y = tenthpctmass - 4, label = paste("10th %ile:", round(tenthpctmass, 1)), size = 11/.pt) +
         labs(y = "Car Only Weight, kg", x = "Weight Rank", color = input$rank_factor) +
-        theme_minimal()
+        theme_minimal(base_size = 14)
     })
 
 
@@ -213,12 +225,12 @@ server <- function(input, output) {
 #          xlab = 'Car Only Weight (lb)',
 #          main = 'Histogram of Car Only Weights')
 # })
-    output$densityPlot <- renderPlot({
-      # collect elements of plot
-      x2 <- Input_Data$`Car Only`[!is.na(Input_Data$`Car Only`)]
-      
-      plot(density(x2))
-    })
+    # output$densityPlot <- renderPlot({
+    #   # collect elements of plot
+    #   x2 <- Input_Data$`Car Only`[!is.na(Input_Data$`Car Only`)]
+    #   
+    #   plot(density(x2))
+    # })
     
     output$boxplotByFrame <- renderPlot({
       Input_Data %>% 
@@ -231,7 +243,8 @@ server <- function(input, output) {
         geom_jitter(aes(y = `Car Only`,
                         x = Frame),
                     alpha = 0.3,
-                    height = 0)
+                    height = 0) +
+        theme_minimal(base_size = 14)
     })
     
     output$boxplotByAero <- renderPlot({
@@ -245,7 +258,8 @@ server <- function(input, output) {
         geom_jitter(aes(y = `Car Only`,
                         x = `Aerodynamic Package`),
                     alpha = 0.3,
-                    height = 0)
+                    height = 0) +
+        theme_minimal(base_size = 14)
     })
     
     output$boxplotByWheel <- renderPlot({
@@ -259,7 +273,8 @@ server <- function(input, output) {
         geom_jitter(aes(y = `Car Only`,
                         x = `Wheel Diameter`),
                     alpha = 0.3,
-                    height = 0)
+                    height = 0) +
+        theme_minimal(base_size = 14)
     })
     
     output$boxplotByCylinders <- renderPlot({
@@ -273,7 +288,8 @@ server <- function(input, output) {
         geom_jitter(aes(y = `Car Only`,
                         x = `Engine Cylinders`),
                     alpha = 0.3,
-                    height = 0)
+                    height = 0) +
+        theme_minimal(base_size = 14)
     })
     
     output$boxplotByTurbo <- renderPlot({
@@ -287,7 +303,8 @@ server <- function(input, output) {
         geom_jitter(aes(y = `Car Only`,
                         x = Turbo),
                     alpha = 0.3,
-                    height = 0)
+                    height = 0) +
+        theme_minimal(base_size = 14)
     })
     
     output$boxplotByWheel <- renderPlot({
@@ -301,12 +318,13 @@ server <- function(input, output) {
         geom_jitter(aes(y = `Car Only`,
                         x = `Wheel Diameter`),
                     alpha = 0.3,
-                    height = 0)
+                    height = 0) +
+        theme_minimal(base_size = 14)
     })
     
     output$boxplotByQueue <- renderPlot({
       Input_Data %>% 
-        filter(!is.na(`Car Only`)) %>%
+        filter(!is.na(`Car Only`), !is.na(`Design Queue`)) %>%
         ggplot() +
         geom_boxplot(aes(y = `Car Only`,
                          x = `Design Queue`),
@@ -315,12 +333,13 @@ server <- function(input, output) {
         geom_jitter(aes(y = `Car Only`,
                         x = `Design Queue`),
                     alpha = 0.3,
-                    height = 0)
+                    height = 0) +
+        theme_minimal(base_size = 14)
     })
     
     output$boxplotByDesignTime <- renderPlot({
       Input_Data %>% 
-        filter(!is.na(`Car Only`)) %>%
+        filter(!is.na(`Car Only`), !is.na(`Design Time`)) %>%
         ggplot() +
         geom_boxplot(aes(y = `Car Only`,
                          x = `Design Time`),
@@ -328,7 +347,8 @@ server <- function(input, output) {
         geom_jitter(aes(y = `Car Only`,
                         x = `Design Time`),
                     alpha = 0.3,
-                    height = 0)
+                    height = 0) +
+        theme_minimal(base_size = 14)
     })
     
     output$scatterWheelbase <- renderPlot({
@@ -341,7 +361,7 @@ server <- function(input, output) {
         geom_smooth(method = "lm",
                     alpha = 0.2,
                     color = "black") +
-        theme_minimal()
+        theme_minimal(base_size = 14)
     })
     
     output$scattercenterofmass <- renderPlot({
@@ -355,9 +375,21 @@ server <- function(input, output) {
         geom_hline(yintercept = 0.5) +
         scale_x_continuous(labels = scales::label_percent()) +
         scale_y_continuous(labels = scales::label_percent()) +
-        theme_minimal()
+        theme_minimal(base_size = 14)
     })
 
+    output$scatterWheelFront <- renderPlot({
+      Input_Data %>% mutate(All = factor(c("All"))) %>%
+        filter(!is.na(`Car Only`)) %>%
+        ggplot(aes(y = .data[["Front %"]],
+                   x = Wheelbase)) +
+        geom_point(aes(color = .data[[input$scatter_factor]],
+                       shape = .data[[input$scatter_factor]]))+
+        geom_smooth(method = "lm",
+                    alpha = 0.2,
+                    color = "black") + 
+        theme_minimal(base_size = 14)
+    })
 }
 
 # Run the application 

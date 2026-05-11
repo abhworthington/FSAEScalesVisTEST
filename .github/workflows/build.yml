@@ -28,7 +28,13 @@ jobs:
             ${{ runner.os }}-r-
       
       - name: Install dependencies
-        run: Rscript -e 'install.packages(c("shinylive","readxl","ggplot2","dplyr","DT","ggbeeswarm","scales","MASS"))'
+        run: Rscript -e 'install.packages(c("shinylive",
+        "readxl",
+        "ggplot2",
+        "dplyr",
+        "DT",
+        "ggbeeswarm",
+        "scales"))'
       
       - name: Build Site
         run: Rscript -e 'shinylive::export("src", "site")'

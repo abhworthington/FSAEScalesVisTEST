@@ -8,12 +8,9 @@
 #
 
 library(shiny)
-#library(googlesheets4)
 library(readxl)
 library(ggplot2)
 library(dplyr)
-#library(DT)
-#gs4_deauth()
 
 Input_Data <- read_excel("Scales Input Table - FSAE 2019 - EDITED.xlsx",
                          sheet = "Export Sheet") %>%

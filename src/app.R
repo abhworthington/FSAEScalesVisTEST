@@ -381,7 +381,7 @@ server <- function(input, output) {
         geom_vline(xintercept = 0.5) +
         geom_hline(yintercept = 0.5) +
         scale_x_continuous(labels = scales::label_percent(),
-                           trans = "reverse") +
+                           transform = "reverse") +
         scale_y_continuous(labels = scales::label_percent()) +
         theme_minimal(base_size = 14)
     })

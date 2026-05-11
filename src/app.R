@@ -374,13 +374,14 @@ server <- function(input, output) {
         filter(!is.na(`Car Only`)) %>%
         ggplot(aes(y = .data[["Front %"]],
                    x = .data[["Left %"]])) +
-        geom_density_2d(color = "black",
-                        alpha = 0.4) +
+        #geom_density_2d(color = "black",
+        #                alpha = 0.4) +
         geom_point(aes(color = .data[[input$scatter_factor]],
                        shape = .data[[input$scatter_factor]])) +
         geom_vline(xintercept = 0.5) +
         geom_hline(yintercept = 0.5) +
-        scale_x_continuous(labels = scales::label_percent()) +
+        scale_x_continuous(labels = scales::label_percent(),
+                          transform = "reverse") +
         scale_y_continuous(labels = scales::label_percent()) +
         theme_minimal(base_size = 14)
     })

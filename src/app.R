@@ -8,13 +8,12 @@
 #
 
 library(shiny)
-#library(googlesheets4)
 library(readxl)
 library(ggplot2)
+library(MASS)
 library(ggbeeswarm)
 library(dplyr)
-#library(DT)
-#gs4_deauth()
+
 
 Input_Data <- read_excel("Scales Input Table - FSAE 2019 - EDITED.xlsx",
                          sheet = "Export Sheet") %>%
@@ -373,16 +372,16 @@ server <- function(input, output) {
       Input_Data %>% mutate(All = factor(c("All"))) %>%
         filter(!is.na(`Car Only`)) %>%
         ggplot(aes(y = .data[["Front %"]],
-                   x = 1-.data[["Left %"]])) +
+                   x = 0.5-.data[["Left %"]])) +
         geom_point(aes(color = .data[[input$scatter_factor]],
                        shape = .data[[input$scatter_factor]])) +
-#        geom_density_2d(color = "black",
-#                        alpha = 0.4) +
-        geom_vline(xintercept = 0.5) +
+        geom_density_2d(color = "black",
+                        alpha = 0.4) +
+        geom_vline(xintercept = 0) +
         geom_hline(yintercept = 0.5) +
         scale_x_continuous(labels = scales::label_percent()) +
         scale_y_continuous(labels = scales::label_percent()) +
-        labs(x = "Right %") + 
+        labs(x = "L/R Imbalance (50% - Left%)") +
         theme_minimal(base_size = 14)
     })
 

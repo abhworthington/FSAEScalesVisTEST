@@ -373,15 +373,16 @@ server <- function(input, output) {
       Input_Data %>% mutate(All = factor(c("All"))) %>%
         filter(!is.na(`Car Only`)) %>%
         ggplot(aes(y = .data[["Front %"]],
-                   x = .data[["Left %"]])) +
+                   x = 1-.data[["Left %"]])) +
         geom_point(aes(color = .data[[input$scatter_factor]],
                        shape = .data[[input$scatter_factor]])) +
-        geom_density_2d(color = "black",
-                        alpha = 0.4) +
+#        geom_density_2d(color = "black",
+#                        alpha = 0.4) +
         geom_vline(xintercept = 0.5) +
         geom_hline(yintercept = 0.5) +
         scale_x_continuous(labels = scales::label_percent()) +
         scale_y_continuous(labels = scales::label_percent()) +
+        labs(x = "Right %") + 
         theme_minimal(base_size = 14)
     })
 
@@ -395,6 +396,7 @@ server <- function(input, output) {
         geom_smooth(method = "lm",
                     alpha = 0.2,
                     color = "black") + 
+        scale_y_continuous(labels = scales::label_percent()) +
         theme_minimal(base_size = 14)
     })
 }
